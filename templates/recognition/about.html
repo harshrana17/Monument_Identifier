@@ -1,0 +1,265 @@
+{% extends 'recognition/base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About MonumentID - AI Monument Classifier</title>
+    <meta name="keywords" content="about us, monument recognition, historical monuments, AI, image recognition, Harsh Rana">
+    <meta name="description" content="Learn about MonumentID, the AI-powered web application for identifying historical monuments.">
+    <meta name="author" content="Priyanka Panchal">
+
+    <link rel="icon" href="{% static 'recognition/images/fevicon.png' %}" type="image/gif" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'recognition/css/bootstrap.min.css' %}">
+
+    <script>
+      // Tailwind Configuration
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              // Refined professional color palette
+              primary: {
+                DEFAULT: '#3B82F6', // Blue-500
+                dark: '#1D4ED8',   // Blue-700
+                light: '#EFF6FF'   // Blue-50
+              },
+              secondary: {
+                  DEFAULT: '#D1D5DB', // Gray-300
+                  dark: '#F3F4F6',   // Gray-100
+                  light: '#F9FAFB'   // Gray-50
+              },
+              accent: {
+                  DEFAULT: '#F59E0B', // Amber-500
+                  dark: '#B45309'    // Amber-700
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        /* Custom Styles for Elegance */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Dark mode gradient background */
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        }
+
+        /* Add subtle hover effect to cards */
+        .info-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Style for section headers */
+        .section-header {
+            color: #F3F4F6; /* gray-100 */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-header::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: #F59E0B; /* accent */
+            margin-top: 8px;
+        }
+        .text-center .section-header::after {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Icon styling */
+        .feature-icon {
+            background-color: #1E3A8A; /* blue-900 */
+            color: #60A5FA; /* blue-400 */
+            border-radius: 50%;
+            padding: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            width: 60px;
+            height: 60px;
+        }
+        .tech-icon {
+             color: #60A5FA; /* blue-400 */
+             margin-right: 0.5rem;
+        }
+
+        /* Ensure full height */
+        html, body {
+            height: 100%;
+        }
+        body > div { /* Assuming the main content div is direct child */
+           min-height: calc(100vh - 100px); /* Adjust 100px based on header/footer height in base.html */
+        }
+
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-100 antialiased">
+
+    <div class="container mx-auto px-4 py-16 lg:py-24">
+
+        <div class="text-center mb-16 animate__animated animate__fadeInDown">
+            <h1 class="text-4xl lg:text-5xl font-bold text-gray-100 mb-3">About <span class="text-primary">Monument</span><span class="text-accent">ID</span></h1>
+            <p class="text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto">Discovering the world's heritage, one monument at a time, powered by Artificial Intelligence.</p>
+        </div>
+
+        <section class="mb-16 lg:mb-24">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2 animate__animated animate__fadeInLeft">
+                    <h2 class="section-header text-3xl lg:text-4xl">Our Mission</h2>
+                    <p class="text-gray-300 mb-4 text-lg leading-relaxed">
+                        At MonumentID, our mission is to leverage cutting-edge AI to make history and culture more accessible. We aim to provide a seamless experience for users to identify historical monuments, learn about their significance, and foster a deeper appreciation for global heritage.
+                    </p>
+                    <p class="text-gray-300 text-lg leading-relaxed">
+                        Whether you're a student, traveler, researcher, or simply curious, MonumentID is your digital guide to the architectural wonders of the past.
+                    </p>
+                </div>
+                <div class="lg:w-1/2 animate__animated animate__fadeInRight">
+                    <img src="https://placehold.co/600x400/3B82F6/FFFFFF?text=AI+&+Heritage" alt="AI and Heritage Concept" class="rounded-lg shadow-xl w-full">
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 lg:mb-24 text-center">
+            <h2 class="section-header text-3xl lg:text-4xl inline-block mb-12 animate__animated animate__fadeInUp">How It Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="info-card bg-gray-800 p-6 rounded-lg shadow-md animate__animated animate__fadeInUp" data-wow-delay="0.1s">
+                    <div class="feature-icon">
+                        <i class="fas fa-upload fa-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-100 mb-2">1. Upload Image</h3>
+                    <p class="text-gray-300">Simply upload a clear image of the monument you want to identify.</p>
+                </div>
+                <div class="info-card bg-gray-800 p-6 rounded-lg shadow-md animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+                     <div class="feature-icon">
+                        <i class="fas fa-brain fa-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-100 mb-2">2. AI Analysis</h3>
+                    <p class="text-gray-300">Our advanced AI model analyzes the image, recognizing key architectural features.</p>
+                </div>
+                <div class="info-card bg-gray-800 p-6 rounded-lg shadow-md animate__animated animate__fadeInUp" data-wow-delay="0.3s">
+                     <div class="feature-icon">
+                        <i class="fas fa-landmark fa-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-100 mb-2">3. Get Results</h3>
+                    <p class="text-gray-300">Receive the monument's name, history, location, and architectural details instantly.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 lg:mb-24">
+             <div class="bg-gray-800 p-8 md:p-12 rounded-lg shadow-lg animate__animated animate__fadeIn">
+                <h2 class="section-header text-3xl lg:text-4xl text-center mb-10">Technology Powering MonumentID</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg">
+                    <div>
+                        <h3 class="font-semibold text-gray-100 mb-3"><i class="fas fa-microchip tech-icon"></i>Core AI Model</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                            <li><strong>Deep Learning Model:</strong> ResNet152V2 (Fine-tuned)</li>
+                            <li><strong>Framework:</strong> TensorFlow / Keras</li>
+                            <li><strong>Model Language:</strong> Python</li>
+                            
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-100 mb-3"><i class="fas fa-desktop tech-icon"></i>Frontend & Utilities</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                             <li><strong>Markup & Styling:</strong> HTML5, CSS</li>
+                             <li><strong>Interactivity:</strong> JavaScript</li>
+                             <li><strong>Web Framework:</strong> Django</li>
+                             <li><strong>UI Components:</strong> Font Awesome Icons</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 lg:mb-24 text-center">
+            <h2 class="section-header text-3xl lg:text-4xl inline-block mb-12 animate__animated animate__fadeInUp">Meet the Developer</h2><br>
+            <div class="inline-block bg-gray-800 p-8 rounded-lg shadow-lg info-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+                <img src="https://placehold.co/150x150/F59E0B/FFFFFF?text=P" alt="Harsh Rana" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-accent-light">
+                <h3 class="text-2xl font-semibold text-gray-100">Priyanka Panchal</h3>
+                <p class="text-primary font-medium mb-3">Full Stack Developer & ML Engineer</p>
+                <p class="text-gray-300 max-w-md mx-auto mb-4">
+                    Passionate about building intelligent applications that bridge technology and real-world challenges. Developed MonumentID to combine interests in AI, history, and web development.
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="https://www.linkedin.com/in/Priyankapanchal8123" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary transition duration-300">
+                        <i class="fab fa-linkedin fa-2x"></i>
+                    </a>
+                    <a href="mailto:PriyankaPanchal@gmail.com" class="text-gray-300 hover:text-primary transition duration-300">
+                        <i class="fas fa-envelope fa-2x"></i>
+                    </a>
+                    </div>
+            </div>
+            <div class="inline-block bg-gray-800 p-8 rounded-lg shadow-lg info-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+                <img src="https://placehold.co/150x150/069069/FFFFFF?text=H" alt="Harsh Rana" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-accent-light">
+                <h3 class="text-2xl font-semibold text-gray-100">Harsh Rana</h3>
+                <p class="text-primary font-medium mb-3">Frontend Developer and AI model trainer</p>
+                <p class="text-gray-300 max-w-md mx-auto mb-4">
+                    Passionate about building intelligent applications that bridge technology and real-world challenges. Developed MonumentID to combine interests in AI, history, and web development.
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="https://www.linkedin.com/in/harshrana17" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary transition duration-300">
+                        <i class="fab fa-linkedin fa-2x"></i>
+                    </a>
+                    <a href="mailto:harsh124rana@gmail.com" class="text-gray-300 hover:text-primary transition duration-300">
+                        <i class="fas fa-envelope fa-2x"></i>
+                    </a>
+                    </div>
+            </div>
+        </section>
+
+         <section class="text-center animate__animated animate__fadeIn">
+             <h2 class="text-3xl font-bold text-gray-100 mb-4">Ready to Explore?</h2>
+             <p class="text-lg text-gray-300 mb-6 max-w-xl mx-auto">Start identifying monuments now or get in touch if you have any questions or collaboration ideas.</p>
+             <div class="space-x-4">
+                 <a href="{% url 'upload_image' %}" class="inline-block bg-primary hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-md transition duration-300 shadow-lg">
+                     Try MonumentID <i class="fa fa-arrow-right ml-2"></i>
+                 </a>
+                  <a href="#contact" class="inline-block bg-accent hover:bg-accent-dark text-white font-semibold px-8 py-3 rounded-md transition duration-300 shadow-lg">
+                     Contact Us <i class="fa fa-envelope ml-2"></i>
+                 </a>
+             </div>
+        </section>
+
+    </div> <script>
+      // Example: Initialize WOW.js if you choose to use it
+      // new WOW().init();
+
+      // You can also trigger animations with JavaScript or use Tailwind's built-in animation classes
+    </script>
+
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends 'recognition/base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monument Identifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <style>
+        /* Custom transitions and animations */
+        .transition-opacity { transition: opacity 300ms ease-in-out; }
+        .transition-transform { transition: transform 300ms ease-in-out; }
+        .transition-colors { transition: color, background-color, border-color 300ms ease-in-out; }
+        .transition-all { transition: all 500ms ease-in-out; }
+        .transition-height { transition: height, margin-bottom 400ms ease-out; }
+
+        /* Loading spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        /* Dark mode map filter */
+        .map-dark-filter { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+
+        /* Background Image */
+        .background-image-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .background-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('{% static "images/monument-bg.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            filter: blur(10px);
+            transform: scale(1.1);
+            transition: filter 0.5s ease-in-out;
+        }
+
+        .dark .background-image {
+            filter: blur(15px) brightness(0.6);
+        }
+
+        /* Ensure visibility */
+        #app-container { opacity: 1 !important; }
+    </style>
+</head>
+<body class="font-sans transition-colors duration-300 ease-in-out overflow-x-hidden">
+
+    <div class="background-image-container">
+        <div class="background-image"></div>
+    </div>
+
+    <button id="theme-toggle" class="fixed top-4 right-4 z-50 p-2 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all" aria-label="Toggle theme">
+        <div id="theme-icon-container" class="transition-all"></div>
+    </button>
+
+    <div id="app-container" class="min-h-screen max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
+        <h1 id="app-tagline" class="text-3xl sm:text-4xl font-extrabold text-center mb-4 tracking-tight transition-all">
+            <span class="primary-text">Snap It. Upload It. Know It.</span>
+        </h1>
+        <p id="app-description" class="text-center text-lg mb-12 subtle-text transition-all">
+            Let AI uncover the monument behind your photo — in seconds.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div id="left-column" class="space-y-6 transition-all">
+                <form id="uploadForm" action="{% url 'predict_image' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div id="image-uploader" class="relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors duration-300 ease-in-out">
+                        <input type="file" id="imageUpload" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-label="Upload monument image">
+                        <div class="flex flex-col items-center justify-center text-gray-500 pointer-events-none">
+                            <svg id="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload-cloud h-12 w-12 mb-4 transition-colors">
+                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                <path d="M12 12v9"></path>
+                                <path d="M8 17l4 4l4-4"></path>
+                            </svg>
+                            <p id="uploader-text" class="font-semibold text-color">Drag & Drop or Click to Upload</p>
+                            <p class="text-sm mt-1 subtle-text">Supports JPG, PNG, WEBP</p>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="image-preview-container" class="relative group hidden transition-all transition-height">
+                    <img id="preview-image" src="" alt="Monument preview" class="w-full h-auto max-h-80 object-contain rounded-xl shadow-lg card-bg p-1">
+                    <button id="clear-image-button" class="absolute top-3 right-3 bg-black bg-opacity-50 text-white rounded-full p-1.5 hover:bg-opacity-75 transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100 z-10 icon-color" aria-label="Remove image">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-4 w-4">
+                            <path d="M18 6 6 18"></path>
+                            <path d="m6 6 12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="upload-progress" class="progress my-3 hidden transition-opacity">
+                    <div class="progress-bar bg-green-500 w-0 h-2 rounded-full transition-all duration-500 ease-out"></div>
+                </div>
+            </div>
+
+            <div id="right-column" class="space-y-6 transition-all">
+                <div id="initial-state-message" class="p-6 rounded-xl shadow-lg text-center card-bg subtle-text transition-opacity">
+                    Upload an image to see the magic happen! ✨
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const appTheme = {
+            dark: {
+                background: 'bg-gradient-to-br from-gray-900 via-indigo-950 to-black',
+                text: 'text-gray-200',
+                subtleText: 'text-gray-400',
+                primary: 'text-cyan-400',
+                secondary: 'text-purple-400',
+                cardBg: 'bg-gray-800/60 backdrop-blur-lg border border-gray-700/50',
+                buttonAccent: 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700',
+                buttonText: 'text-white',
+                iconColor: 'text-gray-400 hover:text-cyan-400',
+                inputBorder: 'border-gray-600',
+                focusRing: 'focus:ring-cyan-500',
+                mapFilter: 'map-dark-filter',
+            },
+            light: {
+                background: 'bg-gradient-to-br from-white via-blue-50 to-purple-50',
+                text: 'text-gray-800',
+                subtleText: 'text-gray-500',
+                primary: 'text-blue-600',
+                secondary: 'text-purple-600',
+                cardBg: 'bg-white/70 backdrop-blur-lg border border-gray-200/80',
+                buttonAccent: 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600',
+                buttonText: 'text-white',
+                iconColor: 'text-gray-500 hover:text-blue-600',
+                inputBorder: 'border-gray-300',
+                focusRing: 'focus:ring-blue-500',
+                mapFilter: '',
+            }
+        };
+
+        // --- State Variables ---
+        let currentTheme = 'dark';
+        let imageFile = null;
+        let previewUrl = null;
+        let isLoading = false;
+
+        // --- DOM Elements ---
+        const body = document.body;
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIconContainer = document.getElementById('theme-icon-container');
+        const appContainer = document.getElementById('app-container');
+        const appTagline = document.getElementById('app-tagline');
+        const appDescription = document.getElementById('app-description');
+        const leftColumn = document.getElementById('left-column');
+        const rightColumn = document.getElementById('right-column');
+        const imageUploader = document.getElementById('image-uploader');
+        const fileInput = document.getElementById('imageUpload');
+        const uploadIcon = document.getElementById('upload-icon');
+        const uploaderText = document.getElementById('uploader-text');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('preview-image');
+        const clearImageButton = document.getElementById('clear-image-button');
+        const uploadForm = document.getElementById('uploadForm');
+        const progressBar = document.querySelector('.progress-bar');
+        const progressWrapper = document.getElementById('upload-progress');
+        const initialStateMessage = document.getElementById('initial-state-message');
+
+        // --- Theme Logic ---
+        const applyTheme = (theme) => {
+            const colors = appTheme[theme];
+            for (const t in appTheme) {
+                const themeColors = appTheme[t];
+                body.classList.remove(themeColors.background, themeColors.text);
+                themeToggleBtn.classList.remove(themeColors.cardBg, themeColors.iconColor, themeColors.focusRing.replace('focus:',''), t === 'dark' ? 'focus:ring-offset-gray-900' : 'focus:ring-offset-white');
+                imageUploader.classList.remove(themeColors.inputBorder, `hover:${themeColors.primary.replace('text-','border-')}`, `hover:bg-opacity-10`, t === 'dark' ? 'hover:bg-gray-700/20' : 'hover:bg-blue-50/50');
+                uploadIcon.classList.remove(themeColors.primary, themeColors.subtleText);
+                uploaderText.classList.remove(themeColors.text);
+                imagePreview.classList.remove(themeColors.cardBg);
+                clearImageButton.classList.remove(themeColors.iconColor);
+                initialStateMessage.classList.remove(themeColors.cardBg, themeColors.subtleText);
+                body.classList.remove('dark');
+            }
+            body.classList.add(colors.background, colors.text);
+            themeToggleBtn.classList.add(colors.cardBg, colors.iconColor, colors.focusRing.replace('focus:',''), theme === 'dark' ? 'focus:ring-offset-gray-900' : 'focus:ring-offset-white');
+            imageUploader.classList.add(colors.inputBorder, `hover:${colors.primary.replace('text-','border-')}`, `hover:bg-opacity-10`, theme === 'dark' ? 'hover:bg-gray-700/20' : 'hover:bg-blue-50/50');
+            uploadIcon.classList.add(colors.subtleText);
+            uploaderText.classList.add(colors.text);
+            imagePreview.classList.add(colors.cardBg);
+            clearImageButton.classList.add(colors.iconColor);
+            initialStateMessage.classList.add(colors.cardBg, colors.subtleText);
+            if (theme === 'dark') body.classList.add('dark');
+
+            themeIconContainer.innerHTML = '';
+            setTimeout(() => {
+                const icon = theme === 'dark' ? lucide.createIcons()['sun'] : lucide.createIcons()['moon'];
+                if (icon) {
+                    themeIconContainer.appendChild(icon);
+                    icon.classList.add('h-5', 'w-5');
+                }
+            }, 0);
+
+            currentTheme = theme;
+            localStorage.setItem('appTheme', theme);
+        };
+
+        const toggleTheme = () => {
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        };
+
+        const initializeTheme = () => {
+            const savedTheme = localStorage.getItem('appTheme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            applyTheme(savedTheme);
+        };
+
+        // --- Image Upload Logic ---
+        const handleFileChange = (files) => {
+            const file = files?.[0];
+            if (file && file.type.startsWith("image/")) {
+                uploadImage(file);
+            }
+        };
+
+        const uploadImage = (file) => {
+            imageFile = file;
+            previewUrl = URL.createObjectURL(file);
+
+            imagePreview.src = previewUrl;
+            imagePreviewContainer.classList.remove('hidden');
+            setTimeout(() => imagePreviewContainer.classList.add('opacity-100', 'h-auto', 'mb-6'), 10);
+
+            isLoading = true;
+            progressWrapper.classList.remove('hidden');
+            setTimeout(() => progressWrapper.classList.remove('opacity-0'), 10);
+            progressBar.style.width = '0%';
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    uploadForm.submit();
+                }
+            }, 150);
+
+            updateUI();
+        };
+
+        const clearImage = () => {
+            imageFile = null;
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+            isLoading = false;
+
+            imagePreviewContainer.classList.remove('opacity-100', 'h-auto', 'mb-6');
+            setTimeout(() => {
+                imagePreviewContainer.classList.add('hidden');
+                imagePreview.src = '';
+            }, 400);
+
+            progressWrapper.classList.add('opacity-0');
+            setTimeout(() => progressWrapper.classList.add('hidden'), 300);
+
+            updateUI();
+        };
+
+        // --- Drag and Drop Logic ---
+        const handleDragOver = (e) => {
+            e.preventDefault();
+            imageUploader.classList.add(appTheme[currentTheme].primary.replace('text-','border-'), appTheme[currentTheme].primary.replace('text-','bg-opacity-20'));
+            uploadIcon.classList.remove(appTheme[currentTheme].subtleText);
+            uploadIcon.classList.add(appTheme[currentTheme].primary);
+            uploaderText.textContent = "Drop image here";
+        };
+
+        const handleDragLeave = (e) => {
+            e.preventDefault();
+            imageUploader.classList.remove(appTheme[currentTheme].primary.replace('text-','border-'), appTheme[currentTheme].primary.replace('text-','bg-opacity-20'));
+            uploadIcon.classList.remove(appTheme[currentTheme].primary);
+            uploadIcon.classList.add(appTheme[currentTheme].subtleText);
+            uploaderText.textContent = "Drag & Drop or Click to Upload";
+        };
+
+        const handleDrop = (e) => {
+            e.preventDefault();
+            handleDragLeave(e);
+            handleFileChange(e.dataTransfer.files);
+        };
+
+        // --- UI Update Logic ---
+        const updateUI = () => {
+            initialStateMessage.classList.add('hidden');
+            if (!imageFile && !isLoading) {
+                initialStateMessage.classList.remove('hidden');
+            }
+        };
+
+        // --- Initial Animations ---
+        const runInitialAnimations = () => {
+            appContainer.style.opacity = '1';
+            appTagline.classList.remove('translate-y-5');
+            appDescription.classList.remove('translate-y-5');
+            leftColumn.classList.remove('translate-y-5');
+            rightColumn.classList.remove('translate-y-5');
+            updateUI();
+        };
+
+        // --- Event Listeners ---
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        fileInput.addEventListener('change', (e) => handleFileChange(e.target.files));
+        imageUploader.addEventListener('click', () => fileInput.click());
+        imageUploader.addEventListener('dragover', handleDragOver);
+        imageUploader.addEventListener('dragleave', handleDragLeave);
+        imageUploader.addEventListener('drop', handleDrop);
+        clearImageButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearImage();
+        });
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            runInitialAnimations();
+            initializeTheme();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Monument Identifier{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+    <style>
+        /* Custom Particle Animation */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 12s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-100vh); opacity: 0.1; }
+            100% { transform: translateY(0); opacity: 0.5; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-200 bg-gray-950 transition-colors duration-300">
+    <!-- Background with Particles -->
+    <div class="fixed inset-0 z-[-1] bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-900">
+        <div class="particle" style="width: 6px; height: 6px; left: 15%; top: 25%; animation-delay: 0s;"></div>
+        <div class="particle" style="width: 8px; height: 8px; left: 35%; top: 55%; animation-delay: 2s;"></div>
+        <div class="particle" style="width: 5px; height: 5px; left: 65%; top: 35%; animation-delay: 4s;"></div>
+        <div class="particle" style="width: 7px; height: 7px; left: 85%; top: 75%; animation-delay: 6s;"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-lg shadow-lg">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4">
+            <a class="text-3xl font-bold text-cyan-300 hover:text-cyan-200 transition-transform duration-200 transform hover:scale-105 flex items-center gap-2" href="{% url 'home' %}">
+                <svg data-lucide="landmark" class="h-6 w-6"></svg>
+                Monument Identifier
+            </a>
+            <div class="flex items-center gap-4">
+                <div id="nav-menu" class="hidden md:flex items-center gap-6">
+                    <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'home' %}">
+                        <svg data-lucide="home" class="h-4 w-4"></svg>
+                        Home
+                    </a>
+                    <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'upload_image' %}">
+                        <svg data-lucide="upload" class="h-4 w-4"></svg>
+                        Upload
+                    </a>
+                    <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'about' %}">
+                        <svg data-lucide="info" class="h-4 w-4"></svg>
+                        About
+                    </a>
+                </div>
+                <button id="theme-toggle" class="relative p-2 rounded-full text-gray-300 hover:bg-gray-700/50 transition-colors duration-200" aria-label="Toggle theme">
+                    <div id="theme-icon-container" class="h-5 w-5"></div>
+                </button>
+                <button id="menu-toggle" class="md:hidden p-2 rounded-full text-gray-300 hover:bg-gray-700/50 transition-colors duration-200" aria-label="Toggle menu">
+                    <svg data-lucide="menu" class="h-6 w-6"></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden fixed inset-y-0 right-0 w-3/4 max-w-sm bg-gray-900/95 backdrop-blur-lg shadow-lg p-6 transform translate-x-full transition-transform duration-300 z-50">
+            <div class="flex flex-col gap-4">
+                <button id="close-menu" class="self-end p-2 rounded-full text-gray-300 hover:bg-gray-700/50 transition-colors duration-200" aria-label="Close menu">
+                    <svg data-lucide="x" class="h-6 w-6"></svg>
+                </button>
+                <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'home' %}">
+                    <svg data-lucide="home" class="h-4 w-4"></svg>
+                    Home
+                </a>
+                <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'upload_image' %}">
+                    <svg data-lucide="upload" class="h-4 w-4"></svg>
+                    Upload
+                </a>
+                <a class="text-sm font-medium text-gray-300 hover:text-cyan-300 transition-colors duration-200 flex items-center gap-1" href="{% url 'about' %}">
+                    <svg data-lucide="info" class="h-4 w-4"></svg>
+                    About
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 mt-8 min-h-[calc(100vh-80px)]">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        // Theme Configuration
+        const appTheme = {
+            light: {
+                classes: ['bg-gradient-to-br', 'from-gray-100', 'via-blue-100', 'to-purple-100', 'text-gray-800'],
+                nav: 'bg-white/80',
+                navText: 'text-gray-600',
+                hoverText: 'hover:text-cyan-400',
+                icon: 'text-gray-600',
+                mobileMenu: 'bg-white/95'
+            },
+            dark: {
+                classes: ['bg-gradient-to-br', 'from-gray-950', 'via-indigo-950', 'to-gray-900', 'text-gray-200'],
+                nav: 'bg-gray-900/80',
+                navText: 'text-gray-300',
+                hoverText: 'hover:text-cyan-300',
+                icon: 'text-gray-300',
+                mobileMenu: 'bg-gray-900/95'
+            }
+        };
+
+        // State Variables
+        let currentTheme = localStorage.getItem('appTheme') || 'dark';
+
+        // DOM Elements
+        const body = document.body;
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIconContainer = document.getElementById('theme-icon-container');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const navbar = document.querySelector('nav');
+
+        // Theme Logic
+        const applyTheme = (theme) => {
+            const themeConfig = appTheme[theme];
+            // Remove previous theme classes
+            Object.values(appTheme).forEach(config => {
+                body.classList.remove(...config.classes);
+                navbar.classList.remove(config.nav);
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove(config.navText, config.hoverText));
+                themeToggleBtn.classList.remove(config.icon);
+                mobileMenu.classList.remove(config.mobileMenu);
+            });
+            // Apply new theme classes
+            body.classList.add(...themeConfig.classes);
+            navbar.classList.add(themeConfig.nav);
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.add(themeConfig.navText, themeConfig.hoverText));
+            themeToggleBtn.classList.add(themeConfig.icon);
+            mobileMenu.classList.add(themeConfig.mobileMenu);
+
+            // Update theme icon
+            themeIconContainer.innerHTML = '';
+            lucide.createIcon(theme === 'dark' ? 'sun' : 'moon', {
+                class: 'h-5 w-5',
+                stroke: 'currentColor',
+                'stroke-width': 2
+            }).then(icon => themeIconContainer.appendChild(icon));
+
+            localStorage.setItem('appTheme', theme);
+            currentTheme = theme;
+        };
+
+        // Toggle Theme
+        const toggleTheme = () => {
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        };
+
+        // Mobile Menu Logic
+        const toggleMobileMenu = () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('translate-x-full');
+        };
+
+        // Event Listeners
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        menuToggleBtn.addEventListener('click', toggleMobileMenu);
+        closeMenuBtn.addEventListener('click', toggleMobileMenu);
+        document.querySelectorAll('#mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
+        });
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            applyTheme(currentTheme);
+        });
+    </script>
+</body>
+</html>
